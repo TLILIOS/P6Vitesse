@@ -1,5 +1,11 @@
 import Foundation
+import Foundation
 
+protocol NetworkServiceProtocol {
+    func setToken(_ token: String) async
+    func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
+    func requestWithoutResponse(_ endpoint: Endpoint) async throws
+}
 actor NetworkService {
     static let shared = NetworkService()
     private var token: String? {
@@ -185,3 +191,5 @@ struct ErrorResponse: Codable {
 }
 
 struct EmptyResponse: Codable {}
+
+extension NetworkService: NetworkServiceProtocol {}

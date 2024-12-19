@@ -15,8 +15,13 @@ class RegisterViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     
     // MARK: - Dependencies
-    private let networkService = NetworkService.shared
-    
+//    private let networkService = NetworkService.shared
+    private let networkService: NetworkServiceProtocol
+
+    // MARK: - Initialization
+    init(networkService: NetworkServiceProtocol = NetworkService.shared) {
+        self.networkService = networkService
+    }
     // MARK: - Validation
     private var isValidInput: Bool {
         !firstName.isEmpty &&

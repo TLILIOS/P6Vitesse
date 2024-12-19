@@ -1,6 +1,12 @@
 import Foundation
 
-class TokenManager {
+protocol TokenManagerProtocol {
+    func getToken() -> String?
+    func saveToken(_ token: String)
+    func clearToken()
+}
+
+class TokenManager: TokenManagerProtocol {
     static let shared = TokenManager()
     
     private let tokenKey = "authToken"
