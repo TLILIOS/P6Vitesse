@@ -17,41 +17,52 @@ class CandidateListViewModel: ObservableObject {
     @Published var isEditing = false
     @Published var selectedCandidates: Set<String> = []
     @Published var showOnlyFavorites = false
-    
-    private let networkService = NetworkService.shared
+    // Dans CandidateListViewModel.swift
+
+    // Modifier la déclaration du networkService
+    private let networkService: NetworkServiceProtocol
     let isAdmin: Bool
-    
-    init(isAdmin: Bool) {
-        self.isAdmin = isAdmin
-        Task {
-            await fetchCandidates()
-        }
-    }
-    
-    var filteredCandidates: [Candidate] {
-        var filtered = candidates
-        
-        // Filtre de recherche
-        if !searchText.isEmpty {
-            filtered = filtered.filter { candidate in
-                let searchTerms = searchText.lowercased().split(separator: " ")
-                let candidateFullName = "\(candidate.firstName) \(candidate.lastName)".lowercased()
-                
-                return searchTerms.allSatisfy { term in
-                    candidateFullName.contains(term) ||
-                    candidate.email.lowercased().contains(term) ||
-                    (candidate.phone?.lowercased().contains(term) ?? false)
+    // Modifier l'initialisation
+    init(networkService: NetworkServiceProtocol = NetworkService.shared,
+             isAdmin: Bool,
+             shouldFetchOnInit: Bool = true) {
+            self.networkService = networkService
+            self.isAdmin = isAdmin
+            
+            if shouldFetchOnInit {
+                Task {
+                    await fetchCandidates()
                 }
             }
         }
+    
+    var filteredCandidates: [Candidate] {
+        // Prepare search term
+        let searchTerm = searchText.lowercased().trimmingCharacters(in: .whitespaces)
         
-        // Filtre des favoris
+        // Filter based on search text
+        var filtered = candidates.filter { candidate in
+            guard !searchTerm.isEmpty else { return true }
+            
+            let firstName = candidate.firstName.lowercased()
+            let lastName = candidate.lastName.lowercased()
+            let email = candidate.email.lowercased()
+            let phone = candidate.phone?.lowercased() ?? ""
+            
+            return firstName.contains(searchTerm) ||
+                   lastName.contains(searchTerm) ||
+                   email.contains(searchTerm) ||
+                   phone.contains(searchTerm)
+        }
+        
+        // Filter based on favorites
         if showOnlyFavorites {
             filtered = filtered.filter { $0.isFavorite }
         }
         
         return filtered
     }
+
     
     func fetchCandidates() async {
         isLoading = true
@@ -120,7 +131,7 @@ class CandidateListViewModel: ObservableObject {
         }
     }
     
-    private func handleError(_ error: Error) {
+    internal func handleError(_ error: Error) {
         if let networkError = error as? NetworkService.NetworkError {
             errorMessage = networkError.message
         } else {

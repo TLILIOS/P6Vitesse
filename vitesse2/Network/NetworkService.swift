@@ -1,8 +1,8 @@
 import Foundation
-import Foundation
 
-protocol NetworkServiceProtocol {
-    func setToken(_ token: String) async
+
+protocol NetworkServiceProtocol: Sendable {
+//    func setToken(_ token: String) async
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
     func requestWithoutResponse(_ endpoint: Endpoint) async throws
 }
@@ -10,13 +10,13 @@ actor NetworkService {
     static let shared = NetworkService()
     private var token: String? {
         get { TokenManager.shared.getToken() }
-        set { 
-            if let newValue = newValue {
-                TokenManager.shared.saveToken(newValue)
-            } else {
-                TokenManager.shared.clearToken()
-            }
-        }
+//        set { 
+//            if let newValue = newValue {
+//                TokenManager.shared.saveToken(newValue)
+//            } else {
+//                TokenManager.shared.clearToken()
+//            }
+//        }
     }
     
     private init() {}
@@ -50,10 +50,10 @@ actor NetworkService {
         }
     }
     
-    func setToken(_ token: String) async {
-        print("Setting token: \(token)")
-        self.token = token
-    }
+//    func setToken(_ token: String) async {
+//        print("Setting token: \(token)")
+//        self.token = token
+//    }
     
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T {
         guard let url = endpoint.url else {
@@ -112,7 +112,7 @@ actor NetworkService {
             }
         case 401:
             print("Unauthorized error - clearing token")
-            self.token = nil
+            TokenManager.shared.clearToken()
             throw NetworkError.unauthorized
         case 400...499:
             let errorMessage = try? JSONDecoder().decode(ErrorResponse.self, from: data).message
@@ -172,7 +172,7 @@ actor NetworkService {
             return
         case 401:
             print("Unauthorized error - clearing token")
-            self.token = nil
+            TokenManager.shared.clearToken()
             throw NetworkError.unauthorized
         case 400...499:
             let errorMessage = try? JSONDecoder().decode(ErrorResponse.self, from: data).message

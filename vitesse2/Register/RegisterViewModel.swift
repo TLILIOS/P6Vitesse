@@ -63,7 +63,7 @@ class RegisterViewModel: ObservableObject {
                 email: email,
                 password: password
             ))
-            await networkService.setToken(authResponse.token)
+            TokenManager.shared.saveToken(authResponse.token)
             isRegistered = true
         } catch {
             handleError(error)

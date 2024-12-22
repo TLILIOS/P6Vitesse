@@ -47,7 +47,6 @@ class LoginViewModel: ObservableObject {
     }
 
     internal func handleToken(_ token: String, isAdmin: Bool) async throws {
-        await networkService.setToken(token)
         tokenManager.saveToken(token) // Ajout pour sauvegarder le token dans le MockTokenManager
         if let storedToken = tokenManager.getToken() {
             print("Token successfully stored: \(String(storedToken.prefix(10)))...")
